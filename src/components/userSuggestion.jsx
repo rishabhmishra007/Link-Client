@@ -6,6 +6,8 @@ import defaultProfile from '../assets/defaultProfile.jpg'; // Use the same defau
 import { GlobalContext } from '../context';
 
 const accessToken = localStorage.getItem('accessToken');
+// console.log("Access Token:", accessToken);
+
 
 const UserSuggestions = () => {
   const {suggestedUsers, setSuggestedUsers, setGlobalProfilePic} = useContext(GlobalContext)
@@ -21,6 +23,7 @@ const UserSuggestions = () => {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
+        withCredentials: true,
       });
       // console.log("user data", response.data);
       

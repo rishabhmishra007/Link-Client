@@ -24,6 +24,11 @@ const ChatPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiPickerRef = useRef(null);
+  // console.log("selectedUser", selectedUser);
+  // console.log("suggestedUsers", suggestedUsers);
+  // console.log("onlineUsers", onlineUsers);
+  
+  
 
   const sendMessageHandler = async (receiverId) => {
     if (!textMessage.trim()) return;
@@ -144,7 +149,7 @@ const ChatPage = () => {
 
               return (
                 <div
-                  key={suggestedUser._id}
+                  key={suggestedUser.id}
                   onClick={() => setSelectedUser(suggestedUser)}
                   className={`flex items-center p-3 mx-2 my-1 rounded-lg cursor-pointer transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-700 ${
                     isSelected ? "bg-blue-50 dark:bg-gray-700" : ""

@@ -21,8 +21,6 @@ import SentimentAnalysis from "../components/SentimentAnalysis";
 import defaultProfile from "../assets/defaultProfile.jpg";
 import { GlobalContext } from "../context";
 
-import PostSentiment from "../components/PostSentiment";
-import PostSentimentAnalysis from "../components/PostSentiment";
 
 export default function Home() {
   const { profilePic } = useContext(GlobalContext);

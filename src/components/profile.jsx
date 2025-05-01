@@ -18,10 +18,13 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import CommentIcon from "@mui/icons-material/Comment";
 import PersonIcon from "@mui/icons-material/Person";
 import GroupIcon from "@mui/icons-material/Group";
+import DeleteIcon from "@mui/icons-material/Delete";
+import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import { useTheme } from "@mui/material/styles";
 import axios from "axios";
 import defaultProfile from "../assets/defaultProfile.jpg";
 import { Close } from "@mui/icons-material";
+import "./profile.css"
 
 const getButtonStyle = () => ({
   fontSize: "1rem",
@@ -55,6 +58,8 @@ export default function Profile() {
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const [postCount, setPostCount] = useState(0);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchUserProfile = async () => {
     try {
@@ -111,6 +116,39 @@ export default function Profile() {
     }
   };
 
+  // Check if the selected post belongs to the logged-in user
+  const isOwnPost = selectedPost && user && selectedPost.user === user.username;
+
+  // Delete post handler
+  const handleDeletePost = async () => {
+    if (!selectedPost) return;
+    setDeleting(true);
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      await axios.delete(
+        `http://localhost:8000/api/v1/posts/${selectedPost._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      // Remove the deleted post from state
+      setUser((prev) => ({
+        ...prev,
+        posts: prev.posts.filter((p) => p._id !== selectedPost._id),
+      }));
+      setPostCount((prev) => prev - 1);
+      setIsDeleteModalOpen(false);
+      setIsPostModalOpen(false);
+      setSelectedPost(null);
+    } catch (error) {
+      console.error("Failed to delete post", error);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   useEffect(() => {
     fetchUserProfile();
     const intervalId = setInterval(fetchUserProfile, 20000);
@@ -160,7 +198,13 @@ export default function Profile() {
   };
 
   return (
-    <Box sx={{ minHeight: "85vh", backgroundColor: "#f9f9f9", p: isSmallScreen ? 2 : 4, }}>
+    <Box
+      sx={{
+        minHeight: "85vh",
+        backgroundColor: "#f9f9f9",
+        p: isSmallScreen ? 2 : 4,
+      }}
+    >
       <Box
         sx={{
           display: "flex",
@@ -175,7 +219,7 @@ export default function Profile() {
           src={user.profilePicture || defaultProfile}
           alt={user.username}
           sx={{
-            width: isSmallScreen ? 100 : 134, 
+            width: isSmallScreen ? 100 : 134,
             height: isSmallScreen ? 100 : 134,
             cursor: "pointer",
             boxShadow: 3,
@@ -183,20 +227,33 @@ export default function Profile() {
           onClick={handleOpenProfileModal}
         />
         <Box sx={{ flex: 1 }}>
-          <Typography variant={isSmallScreen ? "h5" : "h4"}  component="h1" fontWeight="bold">
+          <Typography
+            variant={isSmallScreen ? "h5" : "h4"}
+            component="h1"
+            fontWeight="bold"
+          >
             {user.username}
           </Typography>
           <Typography variant="subtitle1" color="textSecondary">
             @{user.username}
           </Typography>
-          <Typography variant="body2" color="textSecondary" mt={1} sx={{ textAlign: isSmallScreen ? "center" : "left" }}>
+          <Typography
+            variant="body2"
+            color="textSecondary"
+            mt={1}
+            sx={{ textAlign: isSmallScreen ? "center" : "left" }}
+          >
             {user.bio}
           </Typography>
         </Box>
-        <Box sx={{  display: "flex",
+        <Box
+          sx={{
+            display: "flex",
             flexDirection: isSmallScreen ? "column" : "row", // Stack buttons on smaller screens
             gap: 2,
-            width: isSmallScreen ? "100%" : "auto", }}>
+            width: isSmallScreen ? "100%" : "auto",
+          }}
+        >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <PersonIcon />
             <Typography>{user.followers} Followers</Typography>
@@ -226,7 +283,11 @@ export default function Profile() {
             gap: isSmallScreen ? 2 : 0,
           }}
         >
-          <Typography variant={isSmallScreen ? "h6" : "h5"} component="h2" fontWeight="bold">
+          <Typography
+            variant={isSmallScreen ? "h6" : "h5"}
+            component="h2"
+            fontWeight="bold"
+          >
             Posts
           </Typography>
           <Typography variant="body2" color="textSecondary">
@@ -250,7 +311,7 @@ export default function Profile() {
             user.posts
               .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
               .map((post, index) => (
-                <Grid size={{xs: 12, sm: 6, md: 4}} key={index}>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
                   <Card
                     sx={{
                       position: "relative",
@@ -429,15 +490,34 @@ export default function Profile() {
                   />
                 </Box>
 
+                {/* Delete Button (only for own post) */}
                 {/* Post Details */}
-                <Typography
-                  variant="h6"
-                  component="h2"
-                  fontWeight="bold"
-                  mb={2}
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    mb: 2,
+                  }}
                 >
-                  Post Details
-                </Typography>
+                  <Typography
+                    variant="h6"
+                    component="h2"
+                    fontWeight="bold"
+                    mb={2}
+                  >
+                    Post Details
+                  </Typography>
+
+                  <button
+                    className="del-btn"
+                    onClick={() => setIsDeleteModalOpen(true)}
+                  >
+                    <svg viewBox="0 0 448 512" class="svgIcon">
+                      <path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"></path>
+                    </svg>
+                  </button>
+                </Box>
+
                 <Typography variant="body1" mb={2}>
                   {selectedPost.description || "No description available."}
                 </Typography>
@@ -500,6 +580,68 @@ export default function Profile() {
                 )}
               </>
             )}
+          </Box>
+        </Fade>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        open={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        closeAfterTransition
+        slots={{ backdrop: Backdrop }}
+        slotProps={{ timeout: 500 }}
+      >
+        <Fade in={isDeleteModalOpen}>
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 350,
+              bgcolor: "background.paper",
+              borderRadius: "16px",
+              boxShadow: 24,
+              p: 4,
+              textAlign: "center",
+            }}
+          >
+            <WarningAmberRoundedIcon
+              color="warning"
+              sx={{ fontSize: 48, mb: 2 }}
+            />
+            <Typography variant="h6" fontWeight="bold" mb={2}>
+              Confirm Deletion
+            </Typography>
+            <Typography variant="body1" color="textSecondary" mb={3}>
+              Are you sure you want to delete this post? This action cannot be
+              undone.
+            </Typography>
+            <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
+              <Button
+                variant="outlined"
+                onClick={() => setIsDeleteModalOpen(false)}
+                disabled={deleting}
+                sx={{ borderRadius: "20px", minWidth: 100 }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="contained"
+                color="error"
+                onClick={handleDeletePost}
+                disabled={deleting}
+                sx={{
+                  borderRadius: "20px",
+                  minWidth: 100,
+                  fontWeight: "bold",
+                  boxShadow: 1,
+                }}
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </Button>
+            </Box>
           </Box>
         </Fade>
       </Modal>

@@ -52,7 +52,7 @@ const SentimentAnalysis = ({ userComment }) => {
 
       const text = result.response.text();
       const lowerText = text.toLowerCase();
-      console.log(`Comment: "${comment}" → Gemini response: "${text}"`);
+      // console.log(`Comment: "${comment}" → Gemini response: "${text}"`);
 
       if (lowerText.includes("positive")) {
         return "positive";
@@ -102,7 +102,7 @@ const SentimentAnalysis = ({ userComment }) => {
         }
       }
 
-      console.log("Final sentiment distribution:", initialSentimentData);
+      // console.log("Final sentiment distribution:", initialSentimentData);
     } catch (error) {
       console.error("Error calculating sentiment data:", error);
     }

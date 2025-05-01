@@ -14,7 +14,7 @@ const useGetAllMessages = () => {
           }
         );
         if(res.data.success){
-          // console.log(res.data);
+          console.log(res.data);
           
             setMessages(res.data.messages);
         }

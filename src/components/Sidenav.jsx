@@ -202,7 +202,7 @@ const SideNav = () => {
       setTimeout(() => {
         navigate("/");
         setAuthUsers(null);
-        console.log("authUser state cleared");
+        // console.log("authUser state cleared");
       }, 2000);
     } catch (error) {
       console.error("Logout failed:", error);
@@ -560,7 +560,7 @@ const SideNav = () => {
       <SearchPanel
         open={isSearchOpen}
         onClose={() => {
-          console.log("Closing Search Panel...");
+          // console.log("Closing Search Panel...");
           setSearchOpen(false);
           setCollapsed(false); // Always reset the side navigation to expanded state
         }}
